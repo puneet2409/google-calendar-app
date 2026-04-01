@@ -51,4 +51,4 @@ Then go to `http://localhost:8000` in your browser.
 Because this relies strictly on HTML, CSS, and JS, this app can be published for free using **GitHub Pages**, **Vercel**, or **Netlify**. Ensure that whenever you deploy it, you add its final URL to your Google Cloud Console's "Authorized JavaScript origins".
 
 ## License
-MIT License. Free for personal and commercial distribution.
+MIT License. Free for personal use.
