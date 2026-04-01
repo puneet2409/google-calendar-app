@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CalRemind — Google Calendar Meeting Reminders</title>
+  <meta name="description" content="A premium meeting reminder app that connects to Google Calendar and shows Outlook-style popup reminders for your upcoming events." />
+
+  <!-- Google Fonts — Plus Jakarta Sans (premium) + Fira Code (monospace) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- Lucide Icons (modern SVG icon set) -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🔔</text></svg>" />
+</head>
+<body>
+
+  <!-- ====== HEADER ====== -->
+  <header class="app-header" id="appHeader">
+    <div class="app-logo">
+      <div class="app-logo-icon"><i data-lucide="bell-ring" class="icon-sm"></i></div>
+      <span class="app-logo-text">CalRemind</span>
+    </div>
+
+    <div class="header-actions">
+      <span class="header-time" id="headerTime">--:--</span>
+
+      <!-- Reminder Bell -->
+      <button class="reminder-bell hidden" id="reminderBell" title="Reminders" onclick="App.toggleReminderPopup()">
+        <i data-lucide="bell" class="icon-sm"></i>
+        <span class="badge hidden" id="reminderBadge">0</span>
+      </button>
+
+      <!-- Settings -->
+      <button class="settings-btn hidden" id="settingsBtn" title="Settings" onclick="App.toggleSettings()">
+        <i data-lucide="settings" class="icon-sm"></i>
+      </button>
+
+      <!-- User Section -->
+      <div class="user-section" id="userSection">
+        <button class="sign-in-btn hidden" id="signInBtn" onclick="App.handleSignIn()">
+          Sign in with Google
+        </button>
+        <div class="hidden" id="userInfo">
+          <span class="user-name" id="userName"></span>
+          <button class="sign-out-btn" id="signOutBtn" onclick="App.handleSignOut()">Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ====== MAIN ====== -->
+  <main class="app-main" id="appMain">
+
+    <!-- ===== SETUP WIZARD (first-time only) ===== -->
+    <section class="welcome-screen" id="setupWizard">
+      <div class="wizard-container">
+        <!-- Step indicator -->
+        <div class="wizard-steps-indicator">
+          <div class="wizard-step-dot active" data-step="0"></div>
+          <div class="wizard-step-line"></div>
+          <div class="wizard-step-dot" data-step="1"></div>
+          <div class="wizard-step-line"></div>
+          <div class="wizard-step-dot" data-step="2"></div>
+          <div class="wizard-step-line"></div>
+          <div class="wizard-step-dot" data-step="3"></div>
+          <div class="wizard-step-line"></div>
+          <div class="wizard-step-dot" data-step="4"></div>
+        </div>
+
+        <!-- Step 0: Welcome -->
+        <div class="wizard-page active" id="wizardStep0">
+          <div class="welcome-icon"><i data-lucide="calendar-check" style="width:36px;height:36px;"></i></div>
+          <h1 class="welcome-title">Never Miss a Meeting</h1>
+          <p class="welcome-subtitle">
+            Connect your Google Calendar and get Outlook-style popup reminders 
+            for your upcoming meetings. Snooze, dismiss, or join with a single click.
+          </p>
+          <p class="welcome-note">
+            <i data-lucide="clock" class="icon-xs"></i>
+            One-time setup takes about 3 minutes. After that, you just sign in and it works!
+          </p>
+          <div class="welcome-actions">
+            <button class="btn-primary btn-lg" onclick="App.wizardNext()">
+              Let's Get Started <i data-lucide="arrow-right" class="icon-xs"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 1: Create Project -->
+        <div class="wizard-page" id="wizardStep1">
+          <div class="wizard-step-icon"><i data-lucide="folder-plus" style="width:44px;height:44px;color:var(--accent-primary-light);"></i></div>
+          <h2 class="wizard-step-title">Step 1: Create a Google Project</h2>
+          <p class="wizard-step-desc">
+            Click the button below. It will open Google Cloud Console. Just type a name like
+            <strong>"My Calendar App"</strong> and click <strong>Create</strong>. That's it!
+          </p>
+          <div class="wizard-visual">
+            <div class="visual-mockup">
+              <div class="mockup-field">
+                <span class="mockup-label">Project name</span>
+                <span class="mockup-value">My Calendar App</span>
+              </div>
+              <div class="mockup-btn">CREATE</div>
+            </div>
+          </div>
+          <a href="https://console.cloud.google.com/projectcreate" target="_blank" class="btn-primary btn-lg">
+            <i data-lucide="external-link" class="icon-xs"></i> Open Google Cloud Console
+          </a>
+          <div class="wizard-nav">
+            <button class="btn-ghost" onclick="App.wizardPrev()"><i data-lucide="arrow-left" class="icon-xs"></i> Back</button>
+            <button class="btn-secondary" onclick="App.wizardNext()">I've done this <i data-lucide="arrow-right" class="icon-xs"></i></button>
+          </div>
+        </div>
+
+        <!-- Step 2: Enable API -->
+        <div class="wizard-page" id="wizardStep2">
+          <div class="wizard-step-icon"><i data-lucide="plug" style="width:44px;height:44px;color:var(--accent-secondary);"></i></div>
+          <h2 class="wizard-step-title">Step 2: Enable Calendar Access</h2>
+          <p class="wizard-step-desc">
+            Click the button below. You'll see a page with a big blue <strong>"Enable"</strong> button. 
+            Just click it. Done!
+          </p>
+          <div class="wizard-visual">
+            <div class="visual-mockup">
+              <div class="mockup-api-card">
+                <span><i data-lucide="calendar" class="icon-xs" style="vertical-align: middle;"></i> Google Calendar API</span>
+                <div class="mockup-btn blue">ENABLE</div>
+              </div>
+            </div>
+          </div>
+          <a href="https://console.cloud.google.com/apis/library/calendar-json.googleapis.com" target="_blank" class="btn-primary btn-lg">
+            <i data-lucide="external-link" class="icon-xs"></i> Open Calendar API Page
+          </a>
+          <div class="wizard-nav">
+            <button class="btn-ghost" onclick="App.wizardPrev()"><i data-lucide="arrow-left" class="icon-xs"></i> Back</button>
+            <button class="btn-secondary" onclick="App.wizardNext()">I've enabled it <i data-lucide="arrow-right" class="icon-xs"></i></button>
+          </div>
+        </div>
+
+        <!-- Step 3: OAuth Consent -->
+        <div class="wizard-page" id="wizardStep3">
+          <div class="wizard-step-icon"><i data-lucide="shield-check" style="width:44px;height:44px;color:var(--accent-green);"></i></div>
+          <h2 class="wizard-step-title">Step 3: Set Up Sign-In</h2>
+          <p class="wizard-step-desc">
+            This step has a few parts, but they're all simple clicks:
+          </p>
+
+          <div class="wizard-sub-steps">
+            <div class="sub-step">
+              <div class="sub-step-num">A</div>
+              <div>
+                <strong>OAuth consent screen</strong> — Click the link below. Choose <strong>"External"</strong> and click <strong>Create</strong>.
+                Fill in your app name (anything), your email, and click <strong>Save</strong>. Skip the Scopes page. On the Test Users page, add <strong>your own Gmail address</strong>.
+              </div>
+            </div>
+            <div class="sub-step">
+              <div class="sub-step-num">B</div>
+              <div>
+                <strong>Create Credentials</strong> — Go to Credentials page. Click <strong>"+ CREATE CREDENTIALS"</strong> → 
+                <strong>"OAuth client ID"</strong>. Choose <strong>"Web application"</strong>. Under <strong>"Authorized JavaScript origins"</strong>, 
+                click <strong>ADD URI</strong> and type: <code id="currentOrigin2">http://localhost:5500</code>
+                <br/>Click <strong>Create</strong>.
+              </div>
+            </div>
+            <div class="sub-step">
+              <div class="sub-step-num">C</div>
+              <div>
+                <strong>Copy the Client ID</strong> — A popup will show your Client ID. Copy it! 
+                (It looks like <code>123456789-abc.apps.googleusercontent.com</code>)
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px;">
+            <a href="https://console.cloud.google.com/apis/credentials/consent" target="_blank" class="btn-secondary">
+              <i data-lucide="external-link" class="icon-xs"></i> OAuth Consent Screen
+            </a>
+            <a href="https://console.cloud.google.com/apis/credentials" target="_blank" class="btn-secondary">
+              <i data-lucide="external-link" class="icon-xs"></i> Credentials Page
+            </a>
+          </div>
+
+          <div class="wizard-nav">
+            <button class="btn-ghost" onclick="App.wizardPrev()"><i data-lucide="arrow-left" class="icon-xs"></i> Back</button>
+            <button class="btn-secondary" onclick="App.wizardNext()">I have my Client ID <i data-lucide="arrow-right" class="icon-xs"></i></button>
+          </div>
+        </div>
+
+        <!-- Step 4: Paste Client ID -->
+        <div class="wizard-page" id="wizardStep4">
+          <div class="wizard-step-icon"><i data-lucide="party-popper" style="width:44px;height:44px;color:var(--accent-amber);"></i></div>
+          <h2 class="wizard-step-title">Final Step: Paste Your Client ID</h2>
+          <p class="wizard-step-desc">
+            Paste the Client ID you just copied and click <strong>Connect</strong>. 
+            You'll only need to do this once — it's saved in your browser forever!
+          </p>
+
+          <div class="client-id-form-wizard">
+            <input type="text" class="client-id-input large" id="wizardClientIdInput" 
+                   placeholder="Paste your Client ID here..." />
+            <button class="btn-primary btn-lg" onclick="App.finishWizard()">
+              <i data-lucide="rocket" class="icon-xs"></i> Connect My Calendar
+            </button>
+          </div>
+
+          <p class="wizard-hint">
+            <i data-lucide="lightbulb" class="icon-xs"></i>
+            <strong>After this, you'll never see this setup again.</strong> 
+            Just open the app, sign in with Google, and your reminders are ready!
+          </p>
+
+          <div class="wizard-nav">
+            <button class="btn-ghost" onclick="App.wizardPrev()"><i data-lucide="arrow-left" class="icon-xs"></i> Back</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SIGN-IN SCREEN (after setup, before auth) ===== -->
+    <section class="welcome-screen hidden" id="signInScreen">
+      <div class="welcome-icon"><i data-lucide="calendar-check" style="width:36px;height:36px;"></i></div>
+      <h1 class="welcome-title">Welcome Back</h1>
+      <p class="welcome-subtitle">
+        Sign in with your Google account to see your calendar and get meeting reminders.
+      </p>
+      <div class="welcome-actions">
+        <button class="btn-primary btn-lg" onclick="App.handleSignIn()">
+          <i data-lucide="log-in" class="icon-xs"></i> Sign in with Google
+        </button>
+      </div>
+      <button class="btn-ghost" style="margin-top: 20px; font-size: 0.78rem;" onclick="App.resetSetup()">
+        <i data-lucide="rotate-ccw" class="icon-xs"></i> Reset setup / Change Client ID
+      </button>
+    </section>
+
+    <!-- ===== DASHBOARD ===== -->
+    <section class="dashboard hidden" id="dashboard">
+      <!-- Sidebar / Agenda -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-date" id="sidebarDate">--</div>
+          <div class="sidebar-day" id="sidebarDay">--</div>
+          <div class="sidebar-event-count" id="sidebarEventCount">Loading events...</div>
+        </div>
+        <div class="timeline" id="timeline">
+          <div style="display: flex; justify-content: center; padding: 40px;">
+            <div class="loading-spinner"></div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <div class="main-content" id="mainContent">
+        <div class="main-content-header">
+          <h2 class="main-content-title" id="mainTitle">Today's Overview</h2>
+          <p class="main-content-subtitle" id="mainSubtitle">Your meetings and events at a glance</p>
+        </div>
+
+        <!-- Next Meeting Card -->
+        <div class="next-meeting-card hidden" id="nextMeetingCard">
+          <div class="next-meeting-label">
+            <span class="dot"></span>
+            NEXT MEETING
+          </div>
+          <div class="next-meeting-title" id="nextMeetingTitle">--</div>
+          <div class="next-meeting-meta" id="nextMeetingMeta">
+            <span class="next-meeting-meta-item" id="nextMeetingTime"><i data-lucide="clock" class="icon-xs"></i> --</span>
+            <span class="next-meeting-meta-item" id="nextMeetingLocation"><i data-lucide="map-pin" class="icon-xs"></i> --</span>
+          </div>
+          <div class="next-meeting-countdown" id="nextMeetingCountdown">--</div>
+          <div class="next-meeting-actions" id="nextMeetingActions"></div>
+        </div>
+
+        <!-- Events Grid -->
+        <div class="events-grid" id="eventsGrid"></div>
+
+        <!-- No events -->
+        <div class="no-events hidden" id="noEventsMain">
+          <div class="no-events-icon"><i data-lucide="smile" style="width:40px;height:40px;"></i></div>
+          <div class="no-events-text">No more meetings today! Enjoy your free time.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ====== REMINDER POPUP ====== -->
+  <div class="reminder-overlay" id="reminderOverlay" onclick="App.toggleReminderPopup()"></div>
+  <div class="reminder-popup" id="reminderPopup">
+    <div class="reminder-popup-header">
+      <div class="reminder-popup-title">
+        <span class="icon"><i data-lucide="bell-ring" class="icon-sm"></i></span>
+        Reminders
+        <span class="reminder-popup-count" id="reminderPopupCount">0</span>
+      </div>
+      <div class="reminder-popup-actions-top">
+        <button class="btn-dismiss-all" onclick="App.dismissAllReminders()">Dismiss All</button>
+        <button class="btn-close-popup" onclick="App.toggleReminderPopup()"><i data-lucide="x" class="icon-xs"></i></button>
+      </div>
+    </div>
+    <div class="reminder-list" id="reminderList"></div>
+  </div>
+
+  <!-- ====== SETTINGS PANEL ====== -->
+  <div class="settings-overlay" id="settingsOverlay" onclick="App.toggleSettings()"></div>
+  <div class="settings-panel" id="settingsPanel">
+    <div class="settings-title">
+      <span><i data-lucide="settings" class="icon-sm" style="vertical-align: middle;"></i> Settings</span>
+      <button class="btn-close-popup" onclick="App.toggleSettings()"><i data-lucide="x" class="icon-xs"></i></button>
+    </div>
+
+    <div class="settings-group">
+      <div class="settings-group-title">Notifications</div>
+      <div class="settings-item">
+        <div>
+          <div class="settings-item-label">Sound Alerts</div>
+          <div class="settings-item-desc">Play a chime when a reminder fires</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="settingSound" checked onchange="App.saveSetting('sound', this.checked)" />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="settings-item">
+        <div>
+          <div class="settings-item-label">Browser Notifications</div>
+          <div class="settings-item-desc">Show desktop notifications</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="settingBrowserNotif" checked onchange="App.saveSetting('browserNotif', this.checked)" />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="settings-item">
+        <div>
+          <div class="settings-item-label">Auto-popup Reminders</div>
+          <div class="settings-item-desc">Automatically show the reminder popup</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="settingAutoPopup" checked onchange="App.saveSetting('autoPopup', this.checked)" />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <div class="settings-group-title">Reminder Timing</div>
+      <div class="settings-item">
+        <div>
+          <div class="settings-item-label">Default Reminder</div>
+          <div class="settings-item-desc">Minutes before event to trigger</div>
+        </div>
+        <select class="settings-select" id="settingDefaultReminder" onchange="App.saveSetting('defaultReminder', this.value)">
+          <option value="5">5 min</option>
+          <option value="10">10 min</option>
+          <option value="15" selected>15 min</option>
+          <option value="30">30 min</option>
+          <option value="60">1 hour</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <div class="settings-group-title">Account</div>
+      <div class="settings-item">
+        <div>
+          <div class="settings-item-label" id="settingsAccountEmail">Not signed in</div>
+          <div class="settings-item-desc">Google account</div>
+        </div>
+        <button class="sign-out-btn" onclick="App.handleSignOut()">Sign Out</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== STATUS BAR ====== -->
+  <div class="status-bar" id="statusBar">
+    <div>
+      <span class="status-dot disconnected" id="statusDot"></span>
+      <span id="statusText">Not connected</span>
+    </div>
+    <div id="lastSync">--</div>
+  </div>
+
+  <!-- ====== TOAST CONTAINER ====== -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ====== SCRIPTS ====== -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://apis.google.com/js/api.js" async defer></script>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+
+  <!-- Initialize Lucide Icons -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    });
+  </script>
+
+</body>
+</html>
