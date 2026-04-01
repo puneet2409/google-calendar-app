@@ -1,5 +1,7 @@
 # CalRemind - Premium Google Calendar Reminder App
 
+![App Demo](./demo.webp)
+
 A sleek, modern, and Outlook-inspired web application that connects to Google Calendar to provide reliable and persistent meeting reminders.
 
 ## Features
@@ -22,7 +24,6 @@ To use this application, you need to set up a Google Cloud Project to generate a
 6. Set the Application type to **Web application**.
 7. Under **Authorized JavaScript origins**, add the URL where you will host this app. If running locally, add `http://localhost:5500` or whatever local server you are using.
 8. Copy the generated **Client ID**.
-<img width="1906" height="852" alt="image" src="https://github.com/user-attachments/assets/849e73b5-0e61-4f61-b248-de5e92dd78cd" />
 
 ### 2. Configure the Application
 Open `config.js` in a text editor and replace the placeholder with your actual Client ID:
@@ -52,4 +53,4 @@ Then go to `http://localhost:8000` in your browser.
 Because this relies strictly on HTML, CSS, and JS, this app can be published for free using **GitHub Pages**, **Vercel**, or **Netlify**. Ensure that whenever you deploy it, you add its final URL to your Google Cloud Console's "Authorized JavaScript origins".
 
 ## License
-MIT License. Free for personal use.
+MIT License. Free for personal and commercial distribution.
