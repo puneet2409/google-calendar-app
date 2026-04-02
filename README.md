@@ -1,5 +1,6 @@
 # CalRemind - Premium Google Calendar Reminder App
 
+![calremind_demo](https://github.com/user-attachments/assets/14712d5c-b4f8-42b6-abe6-684c1f191ad8)
 
 
 A sleek, modern, and Outlook-inspired web application that connects to Google Calendar to provide reliable and persistent meeting reminders.
