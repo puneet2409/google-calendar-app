@@ -6,18 +6,8 @@
   <title>CalRemind — Google Calendar Meeting Reminders</title>
   <meta name="description" content="A premium meeting reminder app that connects to Google Calendar and shows popup reminders for your upcoming events." />
 
-  <!-- ── Content Security Policy ────────────────────────────────────────
-       Blocks XSS from injected event data. Only whitelisted origins allowed.
-  ─────────────────────────────────────────────────────────────────────── -->
-  <meta http-equiv="Content-Security-Policy" content="
-    default-src 'self';
-    script-src  'self' https://accounts.google.com https://apis.google.com https://unpkg.com;
-    connect-src https://www.googleapis.com https://accounts.google.com;
-    style-src   'self' https://fonts.googleapis.com 'unsafe-inline';
-    font-src    https://fonts.gstatic.com;
-    img-src     'self' data: https:;
-    frame-src   'none';
-  ">
+  <!-- Content Security Policy: blocks XSS from external event data -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: 'unsafe-inline'; script-src 'self' https://accounts.google.com https://apis.google.com https://unpkg.com 'unsafe-inline'; connect-src https://www.googleapis.com https://accounts.google.com">
 
   <!-- PWA manifest hint -->
   <meta name="theme-color" content="#6366F1" />
@@ -26,9 +16,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
-
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 
   <!-- App styles -->
   <link rel="stylesheet" href="style.css" />
@@ -369,19 +356,13 @@
 <script src="constants.js"></script>
 <script src="app.js"></script>
 
-<!-- Init Lucide icons after DOM is ready -->
+<!-- Lucide Icons loaded LAST so it is guaranteed to be available -->
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <script>
-  // Init Lucide icons — use window.onload so Lucide script is guaranteed loaded
-  function initIcons() {
-    if (typeof lucide !== 'undefined') lucide.createIcons();
-    const el = document.getElementById('currentOrigin2');
-    if (el) el.textContent = window.location.origin;
-  }
-  if (document.readyState === 'complete') {
-    initIcons();
-  } else {
-    window.addEventListener('load', initIcons);
-  }
+  // Called synchronously — Lucide is already loaded above
+  lucide.createIcons();
+  const _o = document.getElementById('currentOrigin2');
+  if (_o) _o.textContent = window.location.origin;
 </script>
 
 </body>
