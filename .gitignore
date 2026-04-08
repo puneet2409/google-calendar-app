@@ -1,0 +1,13 @@
+# ── Sensitive config (NEVER commit your real Client ID) ─────────────────
+config.js
+
+# ── OS / Editor artifacts ────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# ── Logs ─────────────────────────────────────────────────────────────────
+*.log
