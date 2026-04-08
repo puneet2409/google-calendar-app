@@ -1,7 +1,4 @@
-# ── Sensitive config (NEVER commit your real Client ID) ─────────────────
-config.js
-
-# ── OS / Editor artifacts ────────────────────────────────────────────────
+# ── Editor / OS artifacts ─────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
 *.swp
@@ -11,3 +8,7 @@ Thumbs.db
 
 # ── Logs ─────────────────────────────────────────────────────────────────
 *.log
+
+# NOTE: config.js is tracked intentionally — it ships with an empty CLIENT_ID.
+# Never paste a real Client ID into config.js and commit it.
+# The setup wizard saves your Client ID safely in your browser's localStorage.

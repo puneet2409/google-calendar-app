@@ -28,7 +28,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
 
   <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 
   <!-- App styles -->
   <link rel="stylesheet" href="style.css" />
@@ -371,12 +371,17 @@
 
 <!-- Init Lucide icons after DOM is ready -->
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
+  // Init Lucide icons — use window.onload so Lucide script is guaranteed loaded
+  function initIcons() {
     if (typeof lucide !== 'undefined') lucide.createIcons();
-    // Fill in current origin for wizard instructions
     const el = document.getElementById('currentOrigin2');
     if (el) el.textContent = window.location.origin;
-  });
+  }
+  if (document.readyState === 'complete') {
+    initIcons();
+  } else {
+    window.addEventListener('load', initIcons);
+  }
 </script>
 
 </body>
